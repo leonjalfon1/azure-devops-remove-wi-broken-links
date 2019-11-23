@@ -297,9 +297,6 @@ function Remove-BrokenLinks
                     $wi = Get-Workitem -WorkitemId $workitemId -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials
                     $workitemLinks = $wi.relations
                     $workitemLinkIndex = 0
-                    
-                    Write-Host "Workitem [$workitemId] contains $($workitemLinks.Count) links"
-                    Add-Content -Path "$LogFile" -Value "Workitem [$workitemId] contains $($workitemLinks.Count) links"
 
                     if($workitemLinks.Count -gt 0)
                     {
@@ -309,8 +306,8 @@ function Remove-BrokenLinks
                             {
                                 if(-not($GitRepositoriesIds.Contains($link.url.Substring(20).Split('%')[1].Substring(2))))
                                 {
-                                    Write-Host "  [$workitemLinkIndex] Broken Link [$($link.url)]" -ForegroundColor Red
-                                    Add-Content -Path "$LogFile" -Value "  [$workitemLinkIndex] Broken Link [$($link.url)]"
+                                    Write-Host "WI $workitemId [$workitemLinkIndex] Broken Link: $($link.url)" -ForegroundColor Red
+                                    Add-Content -Path "$LogFile" -Value "WI $workitemId [$workitemLinkIndex] Broken Link: $($link.url)"
 
                                     if(-not($DryRun))
                                     { 
@@ -322,8 +319,8 @@ function Remove-BrokenLinks
                                 {
                                     if($ExtendedLog) 
                                     { 
-                                        Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green
-                                        Add-Content -Path "$LogFile" -Value "  [$workitemLinkIndex] Valid Link [$($link.url)]"
+                                        Write-Host "WI $workitemId [$workitemLinkIndex] Valid Link: $($link.url)" -ForegroundColor Green
+                                        Add-Content -Path "$LogFile" -Value "WI $workitemId [$workitemLinkIndex] Valid Link: $($link.url)"
                                     }
                                 }
                                 
@@ -333,8 +330,8 @@ function Remove-BrokenLinks
                             {
                                 if($ExtendedLog) 
                                 { 
-                                    Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green
-                                    Add-Content -Path "$LogFile" -Value "  [$workitemLinkIndex] Valid Link [$($link.url)]"
+                                    Write-Host "WI $workitemId [$workitemLinkIndex] Valid Link: $($link.url)" -ForegroundColor Green
+                                    Add-Content -Path "$LogFile" -Value "WI $workitemId [$workitemLinkIndex] Valid Link: $($link.url)"
                                 }
                             }
 
