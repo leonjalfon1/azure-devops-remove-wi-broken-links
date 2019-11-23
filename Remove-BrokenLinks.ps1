@@ -9,7 +9,9 @@
     [Parameter(Mandatory=$false)]
     $ExtendedLog="$true",
     [Parameter(Mandatory=$false)]
-    $DryRun="$true"
+    $DryRun="$true",
+    [Parameter(Mandatory=$false)]
+    $LogFile=".\log.txt"
 )
 
 function Get-WorkitemsList
@@ -48,7 +50,6 @@ function Get-WorkitemsList
                 if(-not($workitemList.Contains($workitemid)))
                 {
                     $workitemList += $workitemid
-                    Write-Host $workitemid
                 }
             }
 
@@ -61,6 +62,7 @@ function Get-WorkitemsList
 	catch
 	{
         Write-Host "Failed to retrieve the workitems list, Exception: $_" -ForegroundColor Red
+        Write-Output "###ERROR, Failed to retrieve the workitems list, Exception: $_"
 		return $null
 	}
 }
@@ -92,6 +94,7 @@ function Get-Workitem
 	catch
 	{
         Write-Host "Failed to get Workitem [$WorkitemId], Exception: $_" -ForegroundColor Red
+        Write-Output "###ERROR, Failed to get Workitem [$WorkitemId], Exception: $_"
 		return $null
 	}
 }
@@ -121,6 +124,7 @@ function Get-ProjectGitRepositoriesIds
 	catch
 	{
         Write-Host "Failed to retrieve Git repositories, Exception: $_" -ForegroundColor Red
+        Write-Output "###ERROR, Failed to retrieve Git repositories, Exception: $_"
 		return $null
 	}
 }
@@ -161,6 +165,7 @@ function Get-GitRepositoriesIds
 	catch
 	{
         Write-Host "Failed to retrieve Git repositories, Exception: $_" -ForegroundColor Red
+        Write-Output "###ERROR, Failed to retrieve Git repositories, Exception: $_"
 		return $null
 	}
 }
@@ -188,6 +193,7 @@ function Get-TeamProjects
 	catch
 	{
         Write-Host "Failed to retrieve Team Projects, Exception: $_" -ForegroundColor Red
+        Write-Output "###ERROR, Failed to retrieve Team Projects, Exception: $_"
 		return $null
 	}
 }
@@ -205,7 +211,9 @@ function Remove-WorkitemLink
         [Parameter(Mandatory=$true)]
         $TeamProject,
         [Parameter(Mandatory=$true)]
-        $Credentials
+        $Credentials,
+        [Parameter(Mandatory=$false)]
+        $LogFile=".\log.txt"
     )
 
 	try
@@ -226,12 +234,15 @@ function Remove-WorkitemLink
         $response = $responseJson.Content | ConvertFrom-Json
 
         Write-Host "Link [$WorkitemLinkIndex] from Workitem [$WorkitemId] successfully removed" -ForegroundColor Magenta
+        Add-Content -Path "$LogFile" -Value "--> Link [$WorkitemLinkIndex] from Workitem [$WorkitemId] successfully removed"
+        
 		return $response
 	}
 
 	catch
 	{
         Write-Host "Failed to remove the link [$WorkitemLink] from Workitem [$WorkitemId], Exception: $_" -ForegroundColor Red
+        Write-Output "###ERROR, Failed to remove the link [$WorkitemLink] from Workitem [$WorkitemId], Exception: $_"
 		return $null
 	}
 }
@@ -251,7 +262,9 @@ function Remove-BrokenLinks
         [Parameter(Mandatory=$true)]
         $ExtendedLog,
         [Parameter(Mandatory=$true)]
-        $DryRun="$true"
+        $DryRun="$true",
+        [Parameter(Mandatory=$false)]
+        $LogFile=".\log.txt"
     )
 
 	try
@@ -281,8 +294,9 @@ function Remove-BrokenLinks
                     $wi = Get-Workitem -WorkitemId $workitemId -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials
                     $workitemLinks = $wi.relations
                     $workitemLinkIndex = 0
-
+                    
                     Write-Host "Workitem [$workitemId] contains $($workitemLinks.Count) links"
+                    Add-Content -Path "$LogFile" -Value "Workitem [$workitemId] contains $($workitemLinks.Count) links"
 
                     if($workitemLinks.Count -gt 0)
                     {
@@ -293,22 +307,32 @@ function Remove-BrokenLinks
                                 if(-not($GitRepositoriesIds.Contains($link.url.Substring(20).Split('%')[1].Substring(2))))
                                 {
                                     Write-Host "  [$workitemLinkIndex] Broken Link [$($link.url)]" -ForegroundColor Red
+                                    Add-Content -Path "$LogFile" -Value "  [$workitemLinkIndex] Broken Link [$($link.url)]"
+
                                     if(-not($DryRun))
                                     { 
-                                        $removeResponse = Remove-WorkitemLink -WorkitemId $workitemId -WorkitemLinkIndex $workitemLinkIndex -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials 
+                                        $removeResponse = Remove-WorkitemLink -WorkitemId $workitemId -WorkitemLinkIndex $workitemLinkIndex -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials -LogFile $LogFile 
                                         if ($removeResponse -ne $null){ $workitemLinkIndex = $workitemLinkIndex - 1}
                                     }
                                 }
                                 else
                                 {
-                                    if($ExtendedLog) { Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green }
+                                    if($ExtendedLog) 
+                                    { 
+                                        Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green
+                                        Add-Content -Path "$LogFile" -Value "  [$workitemLinkIndex] Valid Link [$($link.url)]"
+                                    }
                                 }
                                 
                                 # vstfs:///Git/Commit/{project ID}%2F{repo ID}%2F{commit ID}
                             }
                             else
                             {
-                                if($ExtendedLog) { Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green }
+                                if($ExtendedLog) 
+                                { 
+                                    Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green
+                                    Add-Content -Path "$LogFile" -Value "  [$workitemLinkIndex] Valid Link [$($link.url)]"
+                                }
                             }
 
                             $workitemLinkIndex++
@@ -324,10 +348,11 @@ function Remove-BrokenLinks
 	catch
 	{
         Write-Host "Failed to remove broken workitem links, Exception: $_" -ForegroundColor Red
+        Write-Output "###ERROR, Failed to remove broken workitem links, Exception: $_"
 		return $null
 	}
 }
 
 $teamProjects = Get-TeamProjects -CollectionUrl $CollectionUrl -Credentials $Credentials
 $repositoriesIds = Get-GitRepositoriesIds -CollectionUrl $CollectionUrl -TeamProjects $teamProjects -Credentials $Credentials
-Remove-BrokenLinks -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials -GitRepositories $repositoriesIds -ExtendedLog $ExtendedLog -DryRun $DryRun
+Remove-BrokenLinks -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials -GitRepositories $repositoriesIds -ExtendedLog $ExtendedLog -DryRun $DryRun -LogFile $LogFile
