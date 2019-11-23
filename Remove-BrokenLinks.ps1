@@ -11,7 +11,9 @@
     [Parameter(Mandatory=$false)]
     $DryRun="$true",
     [Parameter(Mandatory=$false)]
-    $LogFile=".\log.txt"
+    $LogFile=".\log.txt",
+    [Parameter(Mandatory=$false)]
+    $StartFromWorkitemId=0
 )
 
 function Get-WorkitemsList
@@ -263,13 +265,15 @@ function Remove-BrokenLinks
         [Parameter(Mandatory=$true)]
         $DryRun="$true",
         [Parameter(Mandatory=$false)]
-        $LogFile=".\log.txt"
+        $LogFile=".\log.txt",
+        [Parameter(Mandatory=$false)]
+        $StartFromWorkitemId=0
     )
 
 	try
 	{
         $workitemList = @()
-        $bulk = 0
+        $bulk = $StartFromWorkitemId
 
         do
         {
@@ -354,4 +358,4 @@ function Remove-BrokenLinks
 
 $teamProjects = Get-TeamProjects -CollectionUrl $CollectionUrl -Credentials $Credentials
 $repositoriesIds = Get-GitRepositoriesIds -CollectionUrl $CollectionUrl -TeamProjects $teamProjects -Credentials $Credentials
-Remove-BrokenLinks -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials -GitRepositories $repositoriesIds -ExtendedLog $ExtendedLog -DryRun $DryRun -LogFile $LogFile
+Remove-BrokenLinks -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials -GitRepositories $repositoriesIds -ExtendedLog $ExtendedLog -DryRun $DryRun -StartFromWorkitemId $StartFromWorkitemId -LogFile $LogFile
