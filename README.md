@@ -9,10 +9,10 @@ Powershell script used to remove Git broken links from workitems (links related 
  - CollectionUrl: Url of the collection/organization
  - TeamProject: Name of the team project
  - Credentials: Credentials to access Azure DevOps
- - Verbose: Show all links (not only the links to remove)
- - DryRun: Show which links will be removed (without remove them)
+ - ExtendedLog: Show all links (not only the links to remove) [$true|$false]
+ - DryRun: Show which links will be removed (without remove them) [$true|$false]
 
 ## Usage
 
-.\Remove-BrokenLinks.ps1 -CollectionUrl "https://dev.azure.com/leonj" -TeamProject "MyProject" -Credentials "user:password" -Verbose $true -DryRun $false
+.\Remove-BrokenLinks.ps1 -CollectionUrl "https://dev.azure.com/organization" -TeamProject "MyProject" -Credentials "user:password" -ExtendedLog $true -DryRun $false
 

@@ -7,7 +7,7 @@
     [Parameter(Mandatory=$true)]
     $Credentials,
     [Parameter(Mandatory=$false)]
-    $Verbose="$true",
+    $ExtendedLog="$true",
     [Parameter(Mandatory=$false)]
     $DryRun="$true"
 )
@@ -249,7 +249,7 @@ function Remove-BrokenLinks
         [Parameter(Mandatory=$true)]
         $Credentials,
         [Parameter(Mandatory=$true)]
-        $Verbose,
+        $ExtendedLog,
         [Parameter(Mandatory=$true)]
         $DryRun="$true"
     )
@@ -301,14 +301,14 @@ function Remove-BrokenLinks
                                 }
                                 else
                                 {
-                                    if($Verbose) { Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green }
+                                    if($ExtendedLog) { Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green }
                                 }
                                 
                                 # vstfs:///Git/Commit/{project ID}%2F{repo ID}%2F{commit ID}
                             }
                             else
                             {
-                                if($Verbose) { Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green }
+                                if($ExtendedLog) { Write-Host "  [$workitemLinkIndex] Valid Link [$($link.url)]" -ForegroundColor Green }
                             }
 
                             $workitemLinkIndex++
@@ -328,7 +328,6 @@ function Remove-BrokenLinks
 	}
 }
 
-
 $teamProjects = Get-TeamProjects -CollectionUrl $CollectionUrl -Credentials $Credentials
 $repositoriesIds = Get-GitRepositoriesIds -CollectionUrl $CollectionUrl -TeamProjects $teamProjects -Credentials $Credentials
-Remove-BrokenLinks -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials -GitRepositories $repositoriesIds -Verbose $Verbose -DryRun $DryRun
+Remove-BrokenLinks -CollectionUrl $CollectionUrl -TeamProject $TeamProject -Credentials $Credentials -GitRepositories $repositoriesIds -ExtendedLog $ExtendedLog -DryRun $DryRun
