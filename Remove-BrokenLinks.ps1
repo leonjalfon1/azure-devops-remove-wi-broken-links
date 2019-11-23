@@ -153,13 +153,12 @@ function Get-GitRepositoriesIds
             $responseJson = Invoke-WebRequest -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)} -ContentType application/json -Uri $requestUrl -Method GET -UseBasicParsing
             $response = $responseJson.Content | ConvertFrom-Json
 
-            foreach($repoId in $response.value.id)
+            foreach($repo in $response.value)
             {
-                $gitRepositories += $repoId
-            }
-            
-		    return $gitRepositories
+                $gitRepositories += $repo.id
+            } 
         } 
+            return $gitRepositories
 	}
 
 	catch
